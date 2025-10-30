@@ -1,4 +1,5 @@
-:root {
+:root,
+:host {
     /* Color palette */
     --color-background: #0c0402;
     --color-text-primary: white;
@@ -13,6 +14,14 @@
     --color-accent-primary: #F97316;
     --color-accent-secondary: #FB923C;
     --color-accent-dark: #2D0D04;
+
+    /* Toggle switch colors */
+    --toggle-bg-off: #80776b;
+    --toggle-bg-off-hover: #63584b;
+    --toggle-border-off: #afa89c;
+    --toggle-bg-on: rgba(249, 115, 22, 0.6);
+    --toggle-bg-on-hover: rgba(249, 115, 22, 0.75);
+    --toggle-border-on: #F97316;
 }
 
 * {

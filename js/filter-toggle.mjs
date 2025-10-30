@@ -21,15 +21,16 @@ class FilterToggle extends HTMLElement {
           position: relative;
           inline-size: 72px;
           block-size: 40px;
-          background-color: var(--toggle-bg, rgba(249, 115, 22, 0.3));
+          background-color: var(--toggle-bg-off, #6b7280);
           border-radius: 40px;
-          border: 2px solid var(--toggle-border, #F97316);
+          border: 2px solid var(--toggle-border-off, #9ca3af);
           cursor: pointer;
-          transition: background-color 0.3s ease;
+          transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .toggle-container.enabled {
-          background-color: var(--toggle-bg-enabled, rgba(249, 115, 22, 0.6));
+          background-color: var(--toggle-bg-on, rgba(249, 115, 22, 0.6));
+          border-color: var(--toggle-border-on, #F97316);
         }
 
         .toggle-thumb {
@@ -56,11 +57,11 @@ class FilterToggle extends HTMLElement {
         }
 
         .toggle-container:hover {
-          background-color: var(--toggle-bg-hover, rgba(249, 115, 22, 0.5));
+          background-color: var(--toggle-bg-off-hover, #4b5563);
         }
 
         .toggle-container.enabled:hover {
-          background-color: var(--toggle-bg-enabled-hover, rgba(249, 115, 22, 0.7));
+          background-color: var(--toggle-bg-on-hover, rgba(249, 115, 22, 0.75));
         }
 
         .toggle-container:active .toggle-thumb {
