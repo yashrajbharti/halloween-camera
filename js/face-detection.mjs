@@ -117,8 +117,13 @@ export const initFaceDetection = () => {
   const detectFaces = async () => {
     if (!isDetectionActive || !faceMesh) return;
 
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      await faceMesh.send({ image: video });
+    if (video.readyState >= video.HAVE_ENOUGH_DATA) {
+      try {
+        await faceMesh.send({ image: video });
+      } catch (error) {
+        // Handle errors gracefully during stream transitions
+        console.debug("Face detection frame skipped:", error);
+      }
     }
 
     requestAnimationFrame(detectFaces);
@@ -136,6 +141,18 @@ export const initFaceDetection = () => {
     }
   };
 
+  // Handle video stream changes (camera switching)
+  const handleStreamChange = () => {
+    // Wait for new stream to be ready
+    if (video.readyState >= 2) {
+      // Stream is ready, detection will continue automatically
+      console.debug("Video stream ready after change");
+    }
+  };
+
+  video.addEventListener("loadedmetadata", handleStreamChange);
+  video.addEventListener("loadeddata", handleStreamChange);
+
   setTimeout(startDetection, 1000);
 
   return {
@@ -144,6 +161,8 @@ export const initFaceDetection = () => {
       if (faceMesh) {
         faceMesh.close();
       }
+      video.removeEventListener("loadedmetadata", handleStreamChange);
+      video.removeEventListener("loadeddata", handleStreamChange);
     },
     toggleFilter: () => {
       isFilterEnabled = !isFilterEnabled;
