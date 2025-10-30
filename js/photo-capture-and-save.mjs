@@ -36,10 +36,10 @@ const drawOnCanvasAndSavePhoto = async (isMirrored = false) => {
 
   const flashElement = document.createElement("div");
   flashElement.style.position = "fixed";
-  flashElement.style.top = "0";
-  flashElement.style.left = "0";
-  flashElement.style.width = "100%";
-  flashElement.style.height = "calc(100vh - 220px)";
+  flashElement.style.insetBlockStart = "0";
+  flashElement.style.insetInlineStart = "0";
+  flashElement.style.inlineSize = "100%";
+  flashElement.style.blockSize = "calc(100vh - 220px)";
   flashElement.style.backgroundColor = getComputedStyle(
     document.documentElement
   ).getPropertyValue("--color-flash-overlay");
@@ -47,10 +47,10 @@ const drawOnCanvasAndSavePhoto = async (isMirrored = false) => {
   setTimeout(() => {
     flashElement.remove();
   }, 200);
-  
+
   // Draw video frame
   context.drawImage(video, 0, 0, canvas.width, canvas.height);
-  
+
   // Draw pumpkin overlay on top
   if (overlayCanvas) {
     context.drawImage(overlayCanvas, 0, 0, canvas.width, canvas.height);
@@ -64,7 +64,21 @@ const drawOnCanvasAndSavePhoto = async (isMirrored = false) => {
     link.download = `photo_${timestamp}.png`;
     link.click();
 
-    document.querySelector(".preview")?.classList?.remove("video");
-    document.querySelector(".preview").src = imageDataUrl;
+    // Replace with image element if it's currently a video
+    const oldPreview = document.querySelector(".preview");
+    if (oldPreview.tagName === "VIDEO") {
+      const imgPreview = document.createElement("img");
+      imgPreview.className = "preview";
+      imgPreview.src = imageDataUrl;
+      imgPreview.alt = "preview image";
+      imgPreview.style.inlineSize = "48px";
+      imgPreview.style.blockSize = "48px";
+      imgPreview.style.objectFit = "cover";
+      imgPreview.style.borderRadius = "4px";
+      oldPreview.replaceWith(imgPreview);
+    } else {
+      oldPreview.classList.remove("video");
+      oldPreview.src = imageDataUrl;
+    }
   } catch (error) {}
 };

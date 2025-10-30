@@ -38,22 +38,33 @@ const recordVideo = async (facingModeButton) => {
   const video = document.getElementById("stream");
   const overlayCanvas = document.getElementById("overlay-canvas");
   const captureButton = document.querySelector(".capture-button");
+
   if (mediaRecorder && mediaRecorder.state === "recording") {
     mediaRecorder.stop();
     clearInterval(timerInterval);
-    if (animationFrameId) {
-      cancelAnimationFrame(animationFrameId);
-      animationFrameId = null;
-    }
     captureButton.classList.remove("recording");
     return;
   }
+
+  // Clear previous chunks
+  chunks = [];
+
   try {
     // Create a composite canvas that combines video and overlay
     compositeCanvas = document.createElement("canvas");
     compositeCanvas.width = video.videoWidth;
     compositeCanvas.height = video.videoHeight;
+
     const ctx = compositeCanvas.getContext("2d");
+    const isFrontCamera = facingModeButton.dataset.facingMode === "front";
+
+    // Apply horizontal flip for front camera
+    if (isFrontCamera) {
+      ctx.translate(compositeCanvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+
+    let isDrawing = true;
 
     // Function to draw video + overlay continuously
     const drawComposite = () => {
@@ -69,13 +80,10 @@ const recordVideo = async (facingModeButton) => {
           compositeCanvas.height
         );
       }
-      if (mediaRecorder && mediaRecorder.state === "recording") {
+      if (isDrawing) {
         animationFrameId = requestAnimationFrame(drawComposite);
       }
     };
-
-    // Start drawing
-    drawComposite();
 
     // Capture the composite canvas as a stream
     compositeStream = compositeCanvas.captureStream(30); // 30 fps
@@ -96,14 +104,20 @@ const recordVideo = async (facingModeButton) => {
     }
 
     mediaRecorder = new MediaRecorder(compositeStream, options);
-    startTime = Date.now();
-    mediaRecorder.start();
-    captureButton.classList.add("recording");
+
     mediaRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
         chunks.push(event.data);
       }
     };
+
+    startTime = Date.now();
+
+    // Start drawing before starting recording
+    drawComposite();
+
+    mediaRecorder.start(1000); // Collect data every 1 second
+    captureButton.classList.add("recording");
 
     recordingIndicator.textContent = "00:00:00";
     recordingIndicator.classList.add("record");
@@ -115,6 +129,7 @@ const recordVideo = async (facingModeButton) => {
     }, 1000);
 
     mediaRecorder.onstop = () => {
+      isDrawing = false; // Stop drawing loop
       saveRecordedVideo();
       clearInterval(timerInterval);
       if (animationFrameId) {
@@ -126,6 +141,7 @@ const recordVideo = async (facingModeButton) => {
 
     facingModeButton.addEventListener("click", () => {
       if (mediaRecorder && mediaRecorder.state === "recording") {
+        isDrawing = false; // Stop drawing loop
         mediaRecorder.stop();
         clearInterval(timerInterval);
         if (animationFrameId) {
@@ -151,8 +167,26 @@ const saveRecordedVideo = () => {
   link.href = videoUrl;
   link.download = filename;
   link.click();
-  document.querySelector(".preview").src = videoUrl;
-  document.querySelector(".preview").classList.add("video");
+
+  // Replace image preview with video element
+  const previewContainer = document.querySelector(".lenses .image");
+  const oldPreview = document.querySelector(".preview");
+
+  // Create video element
+  const videoPreview = document.createElement("video");
+  videoPreview.className = "preview video";
+  videoPreview.src = videoUrl;
+  videoPreview.muted = true;
+  videoPreview.loop = true;
+  videoPreview.autoplay = true;
+  videoPreview.style.inlineSize = "48px";
+  videoPreview.style.blockSize = "48px";
+  videoPreview.style.objectFit = "cover";
+  videoPreview.style.borderRadius = "4px";
+
+  // Replace old preview
+  oldPreview.replaceWith(videoPreview);
+
   chunks = [];
 };
 

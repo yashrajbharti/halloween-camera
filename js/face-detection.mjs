@@ -9,6 +9,7 @@ export const initFaceDetection = () => {
 
   let faceDetection = null;
   let isDetectionActive = false;
+  let isFilterEnabled = true; // Filter enabled by default
 
   // Initialize MediaPipe Face Detection
   const initMediaPipe = () => {
@@ -36,24 +37,29 @@ export const initFaceDetection = () => {
     // Clear canvas
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (results.detections && results.detections.length > 0) {
+    // Only draw pumpkin if filter is enabled
+    if (
+      isFilterEnabled &&
+      results.detections &&
+      results.detections.length > 0
+    ) {
       results.detections.forEach((detection) => {
         const bbox = detection.boundingBox;
 
         // Calculate face dimensions in pixels
         const faceWidth = bbox.width * canvas.width;
         const faceHeight = bbox.height * canvas.height;
-        
+
         // Use the larger dimension to maintain square aspect ratio
         const faceSize = Math.max(faceWidth, faceHeight);
-        
+
         // Make pumpkin 2.6x larger than face size
         const pumpkinSize = faceSize * 2.6;
 
         // Calculate center position
         const centerX = bbox.xCenter * canvas.width;
         const centerY = bbox.yCenter * canvas.height;
-        
+
         // Position pumpkin centered on face, moved up slightly
         const x = centerX - pumpkinSize / 2;
         const y = centerY - pumpkinSize / 2 - 50; // Move up by 50 pixels
@@ -100,6 +106,10 @@ export const initFaceDetection = () => {
         faceDetection.close();
       }
     },
+    toggleFilter: () => {
+      isFilterEnabled = !isFilterEnabled;
+      return isFilterEnabled;
+    },
+    isFilterEnabled: () => isFilterEnabled,
   };
 };
-

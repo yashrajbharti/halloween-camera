@@ -66,10 +66,10 @@ video.flip {
 /* Canvas overlay for face detection */
 #overlay-canvas {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 85svh;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 100vw;
+    block-size: 85svh;
     object-fit: cover;
     object-position: center;
     pointer-events: none;
@@ -79,6 +79,15 @@ video.flip {
 #camera:has(video.flip) #overlay-canvas {
     scale: -1 1;
 }
+
+/* Filter Toggle Switch */
+filter-toggle {
+    position: absolute;
+    inset-inline-end: 20px;
+    inset-block-start: 20px;
+    z-index: 10;
+}
+
 
 /* Video Controls */
 .controls {
@@ -103,24 +112,26 @@ video.flip {
 
 .lenses>.image {
     position: relative;
-    height: 48px;
-    width: 48px;
+    block-size: 48px;
+    inline-size: 48px;
 }
 
 .lenses>.image>.preview {
     object-fit: cover;
-    height: 48px;
-    width: 48px;
+    block-size: 48px;
+    inline-size: 48px;
     border-radius: 4px;
     position: relative;
     z-index: 1;
 }
 
-.lenses>.image>.preview.video {
-    height: 48px;
-    width: 48px;
-    content: url("./assets/video-rect.svg") / "video thumbnail";
-    background-size: cover;
+.lenses>.image>video.preview {
+    block-size: 48px;
+    inline-size: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+    position: relative;
+    z-index: 1;
 }
 
 /* Switch between video and photo capture modes */
@@ -315,5 +326,11 @@ button {
 
 .range-container .slider {
     position: absolute;
-    left: 3px;
+    inset-inline-start: 3px;
+}
+
+input[type="range"] {
+    scale: 1.5;
+    translate: 0 8px;
+    opacity: 0;
 }
