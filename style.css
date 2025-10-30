@@ -63,6 +63,23 @@ video.flip {
     scale: -1 1;
 }
 
+/* Canvas overlay for face detection */
+#overlay-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 85svh;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#camera:has(video.flip) #overlay-canvas {
+    scale: -1 1;
+}
+
 /* Video Controls */
 .controls {
     display: flex;
@@ -71,6 +88,8 @@ video.flip {
     margin-inline: auto;
     justify-content: space-between;
     align-items: center;
+    position: relative;
+    z-index: 10;
 }
 
 /* Video filters */
@@ -79,7 +98,7 @@ video.flip {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    z-index: 2;
+    z-index: 10;
 }
 
 .lenses>.image {
@@ -125,6 +144,7 @@ button {
     background-color: var(--color-overlay-bg);
     cursor: pointer;
     translate: 0 -43px;
+    z-index: 10;
 }
 
 .switch-camera-video-photo-mode label span {
@@ -263,6 +283,7 @@ button {
     font-kerning: none;
     letter-spacing: 0.1rem;
     border-radius: 30px;
+    z-index: 10;
 }
 
 
@@ -275,6 +296,7 @@ button {
     justify-content: center;
     word-spacing: 15px;
     visibility: hidden;
+    z-index: 10;
 }
 
 .zoom-multiplier {

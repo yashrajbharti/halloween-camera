@@ -30,25 +30,79 @@ modes.forEach((mode) =>
   })
 );
 
+let compositeCanvas = null;
+let compositeStream = null;
+let animationFrameId = null;
+
 const recordVideo = async (facingModeButton) => {
   const video = document.getElementById("stream");
+  const overlayCanvas = document.getElementById("overlay-canvas");
   const captureButton = document.querySelector(".capture-button");
   if (mediaRecorder && mediaRecorder.state === "recording") {
     mediaRecorder.stop();
     clearInterval(timerInterval);
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
     captureButton.classList.remove("recording");
     return;
   }
   try {
-    mediaRecorder = new MediaRecorder(video.srcObject);
+    // Create a composite canvas that combines video and overlay
+    compositeCanvas = document.createElement("canvas");
+    compositeCanvas.width = video.videoWidth;
+    compositeCanvas.height = video.videoHeight;
+    const ctx = compositeCanvas.getContext("2d");
+
+    // Function to draw video + overlay continuously
+    const drawComposite = () => {
+      // Draw video frame
+      ctx.drawImage(video, 0, 0, compositeCanvas.width, compositeCanvas.height);
+      // Draw overlay (pumpkin) on top
+      if (overlayCanvas) {
+        ctx.drawImage(
+          overlayCanvas,
+          0,
+          0,
+          compositeCanvas.width,
+          compositeCanvas.height
+        );
+      }
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        animationFrameId = requestAnimationFrame(drawComposite);
+      }
+    };
+
+    // Start drawing
+    drawComposite();
+
+    // Capture the composite canvas as a stream
+    compositeStream = compositeCanvas.captureStream(30); // 30 fps
+
+    // Get audio from the original video stream if available
+    const audioTracks = video.srcObject.getAudioTracks();
+    if (audioTracks.length > 0) {
+      audioTracks.forEach((track) => compositeStream.addTrack(track));
+    }
+
+    // Use supported MIME type for MediaRecorder
+    const options = { mimeType: "video/webm;codecs=vp9" };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      options.mimeType = "video/webm;codecs=vp8";
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options.mimeType = "video/webm";
+      }
+    }
+
+    mediaRecorder = new MediaRecorder(compositeStream, options);
     startTime = Date.now();
     mediaRecorder.start();
     captureButton.classList.add("recording");
     mediaRecorder.ondataavailable = (event) => {
-      const blob = new Blob([event.data], {
-        type: "video/mp4",
-      });
-      chunks.push(blob);
+      if (event.data && event.data.size > 0) {
+        chunks.push(event.data);
+      }
     };
 
     recordingIndicator.textContent = "00:00:00";
@@ -63,6 +117,10 @@ const recordVideo = async (facingModeButton) => {
     mediaRecorder.onstop = () => {
       saveRecordedVideo();
       clearInterval(timerInterval);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
       captureButton.classList.remove("recording");
     };
 
@@ -70,6 +128,10 @@ const recordVideo = async (facingModeButton) => {
       if (mediaRecorder && mediaRecorder.state === "recording") {
         mediaRecorder.stop();
         clearInterval(timerInterval);
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
         captureButton.classList.remove("recording");
       }
     });
@@ -81,9 +143,9 @@ const saveRecordedVideo = () => {
   if (!chunks.length) {
     return;
   }
-  const blob = new Blob(chunks, { type: "video/mp4" });
+  const blob = new Blob(chunks, { type: "video/webm" });
   const timestamp = new Date().toISOString().replace(/[:.]/g, "");
-  const filename = `video_${timestamp}.mp4`;
+  const filename = `video_${timestamp}.webm`;
   const videoUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = videoUrl;

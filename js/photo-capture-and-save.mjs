@@ -19,6 +19,7 @@ export const capturePhoto = () => {
 
 const drawOnCanvasAndSavePhoto = async (isMirrored = false) => {
   const video = document.getElementById("stream");
+  const overlayCanvas = document.getElementById("overlay-canvas");
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   const scaleFactor = 2;
@@ -46,7 +47,14 @@ const drawOnCanvasAndSavePhoto = async (isMirrored = false) => {
   setTimeout(() => {
     flashElement.remove();
   }, 200);
+  
+  // Draw video frame
   context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  
+  // Draw pumpkin overlay on top
+  if (overlayCanvas) {
+    context.drawImage(overlayCanvas, 0, 0, canvas.width, canvas.height);
+  }
 
   try {
     const imageDataUrl = canvas.toDataURL("image/png", 0.9);

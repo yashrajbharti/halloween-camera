@@ -13,11 +13,16 @@
     <link as="font" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4/face_detection.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
     <section id="camera">
         <video id="stream" muted autoplay playsinline data-lens="none"></video>
+        <canvas id="overlay-canvas"></canvas>
         <div class="range-container">
             <input type="range" name="range" id="range" aria-label="Zoom Level">
             <img src="./assets/trackMeter.svg" alt="zoom feature">
