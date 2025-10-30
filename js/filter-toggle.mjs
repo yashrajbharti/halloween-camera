@@ -17,6 +17,11 @@ class FilterToggle extends HTMLElement {
           display: inline-block;
         }
 
+        button {
+          all: unset;
+          cursor: pointer;
+        }
+
         .toggle-container {
           position: relative;
           inline-size: 72px;
@@ -75,13 +80,15 @@ class FilterToggle extends HTMLElement {
         }
       </style>
 
-      <div class="toggle-container ${
+      <button class="toggle-container ${
         this._enabled ? "enabled" : ""
-      }" role="switch" aria-checked="${this._enabled}" tabindex="0">
-        <div class="toggle-thumb" aria-hidden="true">
+      }" type="button" role="switch" aria-checked="${
+      this._enabled
+    }" aria-label="Toggle filter">
+        <span class="toggle-thumb" aria-hidden="true">
           🎃
-        </div>
-      </div>
+        </span>
+      </button>
     `;
   }
 

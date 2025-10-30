@@ -13,8 +13,12 @@ export const initFaceDetection = () => {
   let faceMesh = null;
   let isDetectionActive = false;
   let isFilterEnabled = true; // Filter enabled by default
-  let currentBlend = 0; // 0 = normal, 1 = smile
-  const transitionSpeed = 0.3; // Higher = faster transition
+
+  // Throttle variables to prevent flickering
+  let lastMouthState = false;
+  let mouthStateTimer = null;
+  let confirmedMouthState = false;
+  const STATE_CHANGE_DELAY = 200; // 200ms delay before confirming state change
 
   // Initialize MediaPipe Face Mesh
   const initMediaPipe = () => {
@@ -71,15 +75,24 @@ export const initFaceDetection = () => {
       const landmarks = results.multiFaceLandmarks[0];
 
       // Detect if mouth is open
-      const isSmiling = isMouthOpen(landmarks);
+      const detectedMouthState = isMouthOpen(landmarks);
 
-      // Smoothly transition blend value
-      const targetBlend = isSmiling ? 1 : 0;
-      if (currentBlend < targetBlend) {
-        currentBlend = Math.min(currentBlend + transitionSpeed, targetBlend);
-      } else if (currentBlend > targetBlend) {
-        currentBlend = Math.max(currentBlend - transitionSpeed, targetBlend);
+      // Throttle state changes to prevent flickering
+      if (detectedMouthState !== lastMouthState) {
+        // State changed, reset timer
+        lastMouthState = detectedMouthState;
+        if (mouthStateTimer) {
+          clearTimeout(mouthStateTimer);
+        }
+        // Wait 200ms before confirming the new state
+        mouthStateTimer = setTimeout(() => {
+          confirmedMouthState = detectedMouthState;
+          mouthStateTimer = null;
+        }, STATE_CHANGE_DELAY);
       }
+
+      // Choose pumpkin based on confirmed state (instant switch)
+      const pumpkinImg = confirmedMouthState ? pumpkinSmile : pumpkinNormal;
 
       // Calculate bounding box from landmarks
       let minX = 1,
@@ -111,18 +124,9 @@ export const initFaceDetection = () => {
       const x = centerX - pumpkinSize / 2;
       const y = centerY - pumpkinSize / 2 - 50; // Move up by 50 pixels
 
-      // Draw pumpkins with crossfade transition
-      if (pumpkinNormal.complete && pumpkinSmile.complete) {
-        // Draw normal pumpkin with fading opacity
-        canvasCtx.globalAlpha = 1 - currentBlend;
-        canvasCtx.drawImage(pumpkinNormal, x, y, pumpkinSize, pumpkinSize);
-
-        // Draw smile pumpkin with increasing opacity
-        canvasCtx.globalAlpha = currentBlend;
-        canvasCtx.drawImage(pumpkinSmile, x, y, pumpkinSize, pumpkinSize);
-
-        // Reset alpha
-        canvasCtx.globalAlpha = 1;
+      // Draw selected pumpkin (instant switch)
+      if (pumpkinImg.complete) {
+        canvasCtx.drawImage(pumpkinImg, x, y, pumpkinSize, pumpkinSize);
       }
     }
   }
@@ -157,6 +161,10 @@ export const initFaceDetection = () => {
   return {
     stop: () => {
       isDetectionActive = false;
+      if (mouthStateTimer) {
+        clearTimeout(mouthStateTimer);
+        mouthStateTimer = null;
+      }
       if (faceMesh) {
         faceMesh.close();
       }
