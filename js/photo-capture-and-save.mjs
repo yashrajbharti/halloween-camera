@@ -13,25 +13,9 @@ export const capturePhoto = () => {
     setTimeout(() => {
       photoButton.classList.remove("click");
     }, 500);
-    const isDualMode =
-      document.querySelector(
-        ".switch-camera-video-photo-mode input[type='radio'][name='modes']:checked"
-      ).value === "dual-mode";
-    if (isDualMode) {
-      setTimeout(() => {
-        document.querySelector(".switch-camera-facing-mode").click();
-        setTimeout(() => {
-          drawOnCanvasAndSavePhoto(
-            facingModeButton.dataset.facingMode === "front"
-          );
-        }, 800);
-      }, 1000);
-    }
     drawOnCanvasAndSavePhoto(facingModeButton.dataset.facingMode === "front");
   });
 };
-
-let dualPreview = false;
 
 const drawOnCanvasAndSavePhoto = async (isMirrored = false) => {
   const video = document.getElementById("stream");
@@ -55,7 +39,9 @@ const drawOnCanvasAndSavePhoto = async (isMirrored = false) => {
   flashElement.style.left = "0";
   flashElement.style.width = "100%";
   flashElement.style.height = "calc(100vh - 220px)";
-  flashElement.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  flashElement.style.backgroundColor = getComputedStyle(
+    document.documentElement
+  ).getPropertyValue("--color-flash-overlay");
   document.body.appendChild(flashElement);
   setTimeout(() => {
     flashElement.remove();
@@ -70,21 +56,7 @@ const drawOnCanvasAndSavePhoto = async (isMirrored = false) => {
     link.download = `photo_${timestamp}.png`;
     link.click();
 
-    const isDualMode =
-      document.querySelector(
-        ".switch-camera-video-photo-mode input[type='radio'][name='modes']:checked"
-      ).value === "dual-mode";
     document.querySelector(".preview")?.classList?.remove("video");
-    if (!isDualMode) document.querySelector(".preview").src = imageDataUrl;
-    if (isDualMode) {
-      dualPreview = !dualPreview;
-      if (!dualPreview)
-        document.querySelector(".preview-dual").src = imageDataUrl;
-      if (dualPreview) document.querySelector(".preview").src = imageDataUrl;
-    } else {
-      document.querySelector(".preview-dual").src = "./assets/rect-dual.svg";
-    }
-  } catch (error) {
-    console.error("Error capturing photo:", error);
-  }
+    document.querySelector(".preview").src = imageDataUrl;
+  } catch (error) {}
 };

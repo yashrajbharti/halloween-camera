@@ -1,3 +1,20 @@
+:root {
+    /* Color palette */
+    --color-background: #0c0402;
+    --color-text-primary: white;
+    --color-text-secondary: #afa69c;
+    --color-overlay-bg: rgba(45, 13, 4, 0.6);
+    --color-recording: red;
+    --color-recording-active: #fc5353;
+    --color-transparent: transparent;
+    --color-flash-overlay: rgba(0, 0, 0, 0.5);
+    --color-svg-stroke: #2C2C2C;
+    --color-svg-fill: white;
+    --color-accent-primary: #F97316;
+    --color-accent-secondary: #FB923C;
+    --color-accent-dark: #2D0D04;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -17,13 +34,13 @@ html {
     /* Edge */
     user-select: none;
     /* preventing iOS tap highlight */
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: var(--color-transparent);
     /* Disable browser handling of all panning and zooming gestures, except for regular scrolling */
     touch-action: pan-y;
 }
 
 body {
-    background-color: black;
+    background-color: var(--color-background);
     font-family: "Space Grotesk", sans-serif;
     font-optical-sizing: auto;
     font-weight: normal;
@@ -37,7 +54,7 @@ body {
 /* Video Element */
 video {
     inline-size: 100vw;
-    block-size: 85vh;
+    block-size: 85svh;
     object-fit: cover;
     object-position: center;
 }
@@ -67,29 +84,34 @@ video.flip {
 
 .lenses>.image {
     position: relative;
+    height: 48px;
+    width: 48px;
 }
 
 .lenses>.image>.preview {
     object-fit: cover;
+    height: 48px;
+    width: 48px;
     border-radius: 4px;
     position: relative;
     z-index: 1;
 }
 
 .lenses>.image>.preview.video {
-    content: url("./assets/video-rect.svg");
-}
-
-.lenses>.image>.preview-dual {
-    position: absolute;
-    object-fit: cover;
-    border-radius: 4px;
-    inset-inline-start: 20px;
+    height: 48px;
+    width: 48px;
+    content: url("./assets/video-rect.svg") / "video thumbnail";
+    background-size: cover;
 }
 
 /* Switch between video and photo capture modes */
 .switch-camera-video-photo-mode input[type="checkbox"] {
     display: none;
+}
+
+button {
+    all: unset;
+    cursor: pointer;
 }
 
 .switch-camera-video-photo-mode {
@@ -100,13 +122,13 @@ video.flip {
     justify-content: center;
     gap: 20px;
     padding: 0.6rem;
-    background-color: #1119289a;
+    background-color: var(--color-overlay-bg);
     cursor: pointer;
     translate: 0 -43px;
 }
 
 .switch-camera-video-photo-mode label span {
-    color: white;
+    color: var(--color-text-primary);
     padding-inline: 10px;
     text-align: center;
     mix-blend-mode: difference;
@@ -117,24 +139,46 @@ video.flip {
 }
 
 .switch-camera-video-photo-mode input[type="radio"]+label {
-    color: #9CA3AF;
+    color: var(--color-text-secondary);
     transition: scale 0.2s ease;
 }
 
 .switch-camera-video-photo-mode input[type="radio"]:checked+label {
-    color: #fff;
+    color: var(--color-text-primary);
     scale: 1.1;
 }
 
 /* Capture button */
 #camera:has(.switch-camera-video-photo-mode input[type="radio"]#video-mode:checked) .capture-button .capture-icon {
-    fill: red;
+    fill: var(--color-recording);
+}
+
+#camera:has(.switch-camera-video-photo-mode input[type="radio"]#video-mode:checked) .capture-button.recording .capture-icon {
+    fill: var(--color-recording-active);
 }
 
 /* Switch between rear and front camera modes */
 .switch-camera-facing-mode {
     cursor: pointer;
     pointer-events: all;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.switch-camera-facing-mode svg circle {
+    stroke: var(--color-svg-stroke);
+}
+
+.switch-camera-facing-mode svg path {
+    stroke: var(--color-svg-fill);
+}
+
+.switch-camera-facing-mode svg mask path {
+    fill: var(--color-svg-fill);
 }
 
 .switch-camera-facing-mode:has(.rotating) {
@@ -166,6 +210,24 @@ video.flip {
 /* Capture button to click and take photos */
 .capture-button {
     cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.capture-button svg circle:first-child {
+    stroke: var(--color-svg-stroke);
+}
+
+.capture-button.recording svg circle:first-child {
+    stroke: var(--color-recording-active);
+}
+
+.capture-button svg .capture-icon {
+    fill: var(--color-svg-fill);
 }
 
 .capture-button:is(.click) .capture-icon {
@@ -193,11 +255,11 @@ video.flip {
     inset-block-start: 10px;
     inset-inline-start: 50%;
     translate: -50% 0;
-    background-color: red;
+    background-color: var(--color-recording);
     min-inline-size: 9.5ch;
     text-align: start;
     padding: 10px;
-    color: white;
+    color: var(--color-text-primary);
     font-kerning: none;
     letter-spacing: 0.1rem;
     border-radius: 30px;
@@ -208,7 +270,7 @@ video.flip {
     position: absolute;
     inset-inline-start: 50%;
     translate: -50% 0;
-    inset-block-start: 72vh;
+    inset-block-start: 72svh;
     display: flex;
     justify-content: center;
     word-spacing: 15px;
@@ -218,7 +280,7 @@ video.flip {
 .zoom-multiplier {
     position: absolute;
     inline-size: max-content;
-    color: #fff;
+    color: var(--color-text-primary);
     font-size: 10px;
     translate: 0 18px;
     pointer-events: none;

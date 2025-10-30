@@ -39,10 +39,10 @@ export const streamWebCamVideo = (isFrontCamera = true) => {
         ~~(3 * capabilities.zoom.max + capabilities.zoom.min) / 4
       }x ${~~capabilities.zoom.max}x`;
 
-      console.log("min:", capabilities.zoom.min);
-      console.log("max:", capabilities.zoom.max);
-      console.log("step:", capabilities.zoom.step);
-      console.log("value:", settings.zoom);
+      // console.log("min:", capabilities.zoom.min);
+      // console.log("max:", capabilities.zoom.max);
+      // console.log("step:", capabilities.zoom.step);
+      // console.log("value:", settings.zoom);
 
       input.oninput = function (event) {
         track.applyConstraints({ advanced: [{ zoom: event.target.value }] });
@@ -52,7 +52,5 @@ export const streamWebCamVideo = (isFrontCamera = true) => {
       input.hidden = false;
       document.querySelector(".range-container").style.visibility = "visible";
     })
-    .catch((e) => {
-      console.error(e);
-    });
+    .catch(() => {});
 };

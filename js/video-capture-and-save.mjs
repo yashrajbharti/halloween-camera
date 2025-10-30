@@ -32,15 +32,18 @@ modes.forEach((mode) =>
 
 const recordVideo = async (facingModeButton) => {
   const video = document.getElementById("stream");
+  const captureButton = document.querySelector(".capture-button");
   if (mediaRecorder && mediaRecorder.state === "recording") {
     mediaRecorder.stop();
     clearInterval(timerInterval);
+    captureButton.classList.remove("recording");
     return;
   }
   try {
     mediaRecorder = new MediaRecorder(video.srcObject);
     startTime = Date.now();
     mediaRecorder.start();
+    captureButton.classList.add("recording");
     mediaRecorder.ondataavailable = (event) => {
       const blob = new Blob([event.data], {
         type: "video/mp4",
@@ -60,23 +63,22 @@ const recordVideo = async (facingModeButton) => {
     mediaRecorder.onstop = () => {
       saveRecordedVideo();
       clearInterval(timerInterval);
+      captureButton.classList.remove("recording");
     };
 
     facingModeButton.addEventListener("click", () => {
       if (mediaRecorder && mediaRecorder.state === "recording") {
         mediaRecorder.stop();
         clearInterval(timerInterval);
+        captureButton.classList.remove("recording");
       }
     });
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) {}
 };
 
 const saveRecordedVideo = () => {
   recordingIndicator.remove();
   if (!chunks.length) {
-    console.error("No recorded video data available.");
     return;
   }
   const blob = new Blob(chunks, { type: "video/mp4" });
@@ -89,7 +91,6 @@ const saveRecordedVideo = () => {
   link.click();
   document.querySelector(".preview").src = videoUrl;
   document.querySelector(".preview").classList.add("video");
-  document.querySelector(".preview-dual").src = "./assets/rect-dual.svg";
   chunks = [];
 };
 
